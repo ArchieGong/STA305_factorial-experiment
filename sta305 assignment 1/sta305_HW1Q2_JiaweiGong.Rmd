@@ -1,0 +1,49 @@
+---
+title: "sta305a1q2"
+output: html_document
+date: "2024-01-30"
+---
+
+```{r}
+#2(a)
+x1 <- rbind(c(1,1,1,1,1,1,1),
+           c(1,1,1,0,0,0,0),
+           c(1,0,0,1,1,0,0),
+           c(1,0,0,0,0,1,1),
+           c(0,1,0,1,0,1,0),
+           c(0,1,0,0,1,0,1),
+           c(0,0,1,1,0,0,1),
+           c(0,0,1,0,1,1,0))
+xTxxT1 <- solve(t(x1)%*%x1) %*% t(x1)
+y1 <- c(70, 26, 28.5, 29, 28.6, 30, 29.7, 30.5)
+xTxxT1%*%y1
+#The least squares estimate of the true weights b1, b2, b3, b4, b5, b6, b7 are 8.19375, 8.74375, 9.54375, 9.84375, 10.94375, 10.49375, 10.79375
+```
+
+```{r}
+#2(b)
+x2 <- rbind(c(1,1,1,1,1,1,1),
+           c(1,1,1,-1,-1,-1,-1),
+           c(1,-1,-1,1,1,-1,-1),
+           c(1,-1,-1,-1,-1,1,1),
+           c(-1,1,-1,1,-1,1,-1),
+           c(-1,1,-1,-1,1,-1,1),
+           c(-1,-1,1,1,-1,-1,1),
+           c(-1,-1,1,-1,1,1,-1))
+xTxxT2 <- solve(t(x2)%*%x2) %*% t(x2)
+y2<-c(63, -19, -12, -11, -11, -9, -10, -9)
+xTxxT2%*%y2
+#The least squares estimate of the true weights b1, b2, b3, b4, b5, b6, b7 are 7.50, 8.25, 8.50, 9.75, 10.50, 10.25, 10.50
+```
+
+```{r}
+#2(c)
+#The covariance matrix of estimates of weights by Yate's design  is 
+solve(t(x1) %*% x1)*2.3
+
+#The covariance matrix of estimates of weights by Hotelling's design  is 
+solve(t(x2) %*% x2)*2.3
+# 
+# By comparison, the variance of estimates of weights by Hotelling's design is smaller than that of Yate's design. 
+# Hence, for the goal of higher decision, Hotelling's Design is recommended. 
+```

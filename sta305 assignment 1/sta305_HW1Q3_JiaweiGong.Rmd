@@ -1,0 +1,94 @@
+---
+title: "sta305a1q3"
+output: html_document
+date: "2024-01-30"
+---
+
+```{r}
+#3(ii)
+y1m<- 55 
+s1sq<- 45 
+n1<- 9
+y2m<- 65 
+s2sq<- 51 
+n2<- 11
+sp <- ((n1-1)*s1sq+(n2-1)*s2sq)/(n1-1+n2-1)
+ts <- ((y1m-y2m)-0)/sqrt(sp*((1/n1)+(1/n2)))
+# ts = -3.200216                   
+qt(0.025,n1+n2-2) #= -2.100922
+qt(0.975,n1+n2-2) #= 2.100922
+# As we can see, ts < qt(0.025,n1+n2-2), which indicates the null hypothesis is rejected. 
+# Hence, the difference between two means are not 0. 
+```
+
+```{r}
+#3(iii)
+n1<-seq(1, 100, by=1) 
+n2<- 1.5*n1
+se<- sqrt(50)
+df<- n1+n2-2
+
+t_a<- qt(1-a/2,df)
+
+theta <- 0.5
+#Non-central t-distribution
+non_centrality_parameter<- theta/sqrt(1/n1 + 1/n2)
+power<- pt(-t_a,df,non_centrality_parameter) + 1 - pt(t_a,df,non_centrality_parameter)
+plot(n,power,type = "l",xlab = "n",ylab = "Power")
+
+theta <- 0.25
+non_centrality_parameter<- theta/sqrt(1/n1 + 1/n2)
+power<- pt(-t_a,df,non_centrality_parameter) + 1 - pt(t_a,df,non_centrality_parameter)
+points(n,power,type = "l",col = "blue")
+
+theta <- 0.1
+non_centrality_parameter<- theta/sqrt(1/n1 + 1/n2)
+power<- pt(-t_a,df,non_centrality_parameter) + 1 - pt(t_a,df,non_centrality_parameter)
+points(n,power,type = "l",col = "red")
+
+abline(a = 0.8,b = 0)
+legend("bottomright",legend = c("theta= 0.5","theta=0.25","theta=0.1"),
+lty = c(1,1,1),col = c("black","blue","red"))
+```
+
+```{r}
+#3(iv)
+set.seed(1007249951)
+
+n1<-seq(1, 100, by=1) 
+n2<- 1.5*n1
+n<- 2.5*n1
+se<- sqrt(50)
+theta <- 0.5
+a <- 0.05
+Runs <- 5000
+
+power<- c()
+
+for(i in 1:length(n1)){
+  df<- n1[i]+n2[i]-2
+  tval<- qt(1-a/2,df)
+  diff<- rnorm(Runs,mean=theta*se,sd=se*sqrt(1/n1[i] +1/n2[i]))
+  s2<- se^2*rchisq(Runs,df=df)/df
+  ts<- diff/sqrt(s2*(1/n1[i]+1/n2[i]))
+  power[i]<- sum( abs(ts) >= tval )/Runs
+}
+
+plot(n,power,type = "l", xlab = "n",ylab = "Power")
+```
+
+
+```{r}
+#3(v)
+n1<- 10 
+n2<- 15
+theta<- 0.5
+df<- n1+n2-2 
+non_centrality_parameter<- theta/sqrt(1/n1 + 1/n2)
+tval<- qt(1-a/2,df)
+power<- pt(-tval,df,non_centrality_parameter) + 1 - pt(tval,df,non_centrality_parameter)
+power
+power.t.test(n = 12, delta = theta*se,sd = se,sig.level = 0.05,alternative = c("two.sided"))
+
+#As you can see, 'power.t.test' assume the sizes of two samples are equal. The method used in (iii) allow the sizes of two sample to be unequal. 
+```

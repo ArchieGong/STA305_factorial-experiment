@@ -1,0 +1,39 @@
+---
+title: "sta305a1q1"
+output: html_document
+date: "2024-01-30"
+---
+```{r}
+#Q1(a)(ii)
+qnorm(0.025,0,1)
+qnorm(0.975,0,1)
+```
+
+```{r}
+#Q1(b)(i)
+set.seed(1007249951)
+N <- 5000
+samp_dist <- numeric(N)   
+for (i in seq_along(1:N)) {   
+  index <- sample(x = 2576+3753, size = 2085)
+  a<-length(which(index<=2576))
+  b<-length(which(index>2576))
+  p_A <- a / 2576
+  p_B <- b / 3753
+  samp_dist[i] <- p_A - p_B
+}
+
+#Draw the histogram
+hist(samp_dist)
+
+obs_diff <- (773/2576) - (1312/3753)
+p_value <- sum(samp_dist >= abs(obs_diff) |
+                     samp_dist <= -1*abs(obs_diff))/N
+p_value
+```
+
+```{r}
+#Q1(b)(ii)
+pvalue <- pnorm(-4.12,0,1)*2
+pvalue 
+```
