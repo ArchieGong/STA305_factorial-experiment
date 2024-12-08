@@ -1,0 +1,114 @@
+---
+title: "Untitled"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-02-16"
+---
+
+```{r}
+library(combinat)
+data<-read.csv("DataHW2Q1W2024Hypo.csv")
+data
+```
+
+```{r}
+#a(i)
+mean0 <- sum(data$POY0)/11
+mean0
+mean1 <- sum(data$POY1)/11
+mean1
+mean1-mean0
+#The true average causal effect is -0.8181818
+#the standard treatment is better than new treatment
+```
+
+
+```{r}
+#a(ii)
+doctor_mean0<-sum(data$ObsY0, na.rm = TRUE)/5
+doctor_mean1<-sum(data$ObsY1, na.rm = TRUE)/6
+doctor_mean1-doctor_mean0
+#The result turns out to conflict with true CE, because the effect of new surgery is better than standard surgery
+```
+ 
+```{r}
+#a(iii)
+median0 <- median(data$POY0)
+median0
+median1 <- median(data$POY1)
+median1
+median1-median0
+#The true median causal effect is 0, which means the new surgery has no effect
+```
+```{r}
+median0_arb <- median(data$arbObsY0,na.rm = TRUE)
+median0_arb
+median1_arb <- median(data$arbObsY1,na.rm = TRUE)
+median1_arb
+median1_arb-median0_arb
+#The observed CE is -4.5
+#The result turns out to conflict with true CE, because the effect of standard surgery is better than new surgery
+```
+
+```{r}
+#(b)
+
+observed <- 4.2
+#Under doctor's assignment, the observed average CE is 4.2 from (a)
+Y0 <- c(14,7,4,5,7,6,9,8,7,8,4)
+Y1 <- c(16,3,2,1,3,1,10,9,8,10,7)
+
+N<-choose(11,5)
+res<-numeric(N)
+index<-combn(1:11,5)
+for (i in 1:N){
+  res[i] <- mean(Y1[-index[,i]])-mean(Y0[index[,i]])
+}
+tbar <- mean(res) 
+tbar
+p_val <- sum(abs(res-tbar)>=abs(observed-tbar))/N 
+p_val
+# the p-value is less than 0.05, we can conclude that there is significant difference in means of standard surgery and new surgery.
+```
+
+```{r}
+#(c)
+
+observed <- 4.2
+#Under doctor's assignment, the observed average CE is 4.2 from (a)
+Y0 <- c(14,7,4,5,7,6,9,8,7,8,4)
+Y1 <- c(16,3,2,1,3,1,10,9,8,10,7)
+
+N<-choose(11,5)
+res<-numeric(N)
+index<-combn(1:11,5)
+for (i in 1:N){
+  res[i] <- mean(Y1[-index[,i]])-mean(Y0[index[,i]])
+}
+tbar <- mean(res) 
+tbar
+p_val <- sum(abs(res-tbar)>=abs(observed-tbar))/N 
+p_val
+# the p-value is less than 0.05, we can conclude that there is significant difference in means of standard surgery and new surgery.
+```
+ 
+```{r}
+#From (a)
+median_obs <- -4.5
+N <- choose(11,5)
+index <-combn(1:11,5)
+res <- numeric(N)
+for (i in 1:N)
+{
+  res[i] <- median(Y1[index[,i]])-median(Y0[-index[,i]]) }
+
+tbar <- mean(res) 
+tbar
+pval <- sum(abs(res-tbar)>=abs(observed-tbar))/N 
+pval
+
+# the p-value is less than 0.05, we can conclude that there is significant difference in means of standard surgery and new surgery.
+```
+ 
+ 

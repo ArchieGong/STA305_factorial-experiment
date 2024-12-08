@@ -1,0 +1,116 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-02-16"
+---
+
+```{r}
+library("car")
+```
+
+```{r}
+#(a)
+Units<- c(paste("Unit", 1:20))
+Trt<- c(rep(c("Trt1", "Trt2", "Trt3", "Trt4", "Control"),each=4))
+Trta<- sample(Trt)
+print(cbind(Units, Trta))
+```
+
+```{r}
+#(c)
+#Read the data
+data<- read.csv("DataHW2Q3W2024crd.csv")
+cbind(as.factor(data$Trt),data$Response)
+```
+
+```{r}
+#(i)
+Trt<- as.factor(data$Trt)
+fit <- aov(data$Response ~ Trt)
+summary(fit)
+```
+#From the output, the p-value is less than 0.05, which means H0 is rejected. We conclude there is difference in means of different treatments.
+H0: $$\mu1 = \mu2 = \mu3 = \mu4 = \mu5$$
+```{r}
+summary(lm(data$Response ~ Trt))
+```
+
+```{r}
+#(ii)
+plot(fit$fitted.values, fit$residuals, main="Residuals vs. Fitted")
+#From the residual plots, the scatter has no fanning pattern
+#Hence, the assumption of constancy of error variance is met. 
+```
+
+```{r}
+plot(fit$model$Trt,fit$residuals, main="Residuals vs. Levels")
+#there is no fanning pattern
+```
+
+```{r}
+qqnorm(fit$residuals)
+qqline(fit$residuals)
+#There are lots of points not on the line
+```
+
+```{r}
+qqPlot(fit$residuals)
+#Although, there are lots of points not on the line, these deviated points are in the range of confidence band. Hence, the assumption of normality is held.
+```
+
+```{r}
+#(iii)
+boxplot(data$Response~ Trt, main="boxplots of different Levels")
+#From the Boxplots. the mean with Trt=4 is the highest, the mean with Trt=1 is the lowest.
+```
+
+```{r}
+fit <- aov(data$Response ~ Trt)
+model.tables(fit, type = "means", se = TRUE)
+#From the output, we can the exact means of different treatments
+```
+
+```{r}
+model.tables(fit, type = "effects", se = TRUE)
+#From the output, we can see the effect of the different treatments
+# The output matches the output of exact means of different treatments.
+```
+
+```{r}
+#(iv)
+pairwise.t.test(x=data$Response, g=Trt, p.adjust.method = "none", pool.sd = TRUE, paired = FALSE, alternative = c("two.sided", "less", "greater")) 
+#From the output, the p-value for Trt1 vs. Trt3, Trt1 vs. Trt4, Trt2 vs. Trt4, Trt2 vs. Trt5, Trt3 vs. Trt5, Trt3 vs. Trt4, Trt4 vs. Trt5 are less than 0.05
+#The p-value for Trt1 vs. Trt2,  Trt1 vs. Trt5,  Trt2 vs. Trt3, are larger than 0.05
+#This means there is significant different in means for Trt1 vs. Trt3, Trt1 vs. Trt4, Trt2 vs. Trt4, Trt2 vs. Trt5, Trt3 vs. Trt5, Trt3 vs. Trt4, Trt4 vs. Trt5
+#This means there is no significant different in means for Trt1 vs. Trt2,  Trt1 vs. Trt5,  Trt2 vs. Trt3, 
+```
+
+```{r}
+#(v)
+pairwise.t.test(x=data$Response, g=Trt, p.adjust.method = "bonferroni",pool.sd = TRUE, paired = FALSE, alternative = c("two.sided", "less", "greater")) 
+#From the output, the p-value for Trt1 vs. Trt3, Trt1 vs. Trt4, Trt2 vs. Trt4, Trt3 vs. Trt5,, Trt4 vs. Trt5 are less than 0.05
+#The p-value for Trt1 vs. Trt2,  Trt1 vs. Trt5,  Trt2 vs. Trt3,Trt2 vs. Trt5,  Trt3 vs. Trt4 are larger than 0.05
+#This means there is significant different in means for Trt1 vs. Trt3, Trt1 vs. Trt4, Trt2 vs. Trt4, Trt3 vs. Trt5,, Trt4 vs.Trt5 
+#This means there is no significant different in means for Trt1 vs. Trt2,  Trt1 vs. Trt5,  Trt2 vs. Trt3, Trt2 vs. Trt5,  Trt3 vs. Trt4 
+```
+
+```{r}
+#(vi)
+TukeyHS<- TukeyHSD(fit, ordered=T)
+TukeyHS
+#From the output, the p-values for 2-1,3-1,4-1,3-5,4-5,4-2 are less than 0.05
+#The p-values for 5-1,2-5,3-2,4-3 are larger than 0.05
+#This means there is significant different in means for Trt2 vs. Trt1, Trt3 vs. Trt1, Trt4 vs. Trt1, Trt3 vs. Trt5,, Trt4 vs.Trt2 
+#This means there is no significant different in means for Trt5 vs. Trt1,  Trt2 vs. Trt5,  Trt2 vs. Trt3, Trt4 vs. Trt3
+```
+
+
+
+
+
+
+
+
+
+
+

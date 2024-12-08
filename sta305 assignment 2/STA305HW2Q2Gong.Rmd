@@ -1,0 +1,245 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-02-16"
+---
+
+```{r}
+# Q2 
+set.seed(1007249951)
+library(dplyr)
+library(Matching)
+# Read the data
+data <- read.csv("/Users/davegong/Desktop/dasanxia/sta305/sta305_A2/DataHW2Q2W2024NHANES.csv")
+```
+
+```{r}
+# (a) i) Continuous covariates
+tapply(data$age, data$qsmk, summary)
+#The output shows the mean, median, qualtiles of age for qsmk=0 and qsmk=1
+```
+
+```{r}
+tapply(data$smkIntensity, data$qsmk, summary)
+#The output shows the mean, median, qualtiles of smkIntensity for qsmk=0 and qsmk=1
+```
+
+```{r}
+# density function: Age
+den_qsmk0 <- density(data$age[data$qsmk==0])
+den_qsmk1 <- density(data$age[data$qsmk==1])
+plot( den_qsmk0, col="red", xlim=c(min(data$age), max(data$age)), main="Age")
+lines( den_qsmk1, xlim=c(min(data$age), max(data$age)) )
+#The density of age for qsmk=0 and qsmk=1 are very different 
+```
+
+```{r}
+# density function: smkIntensity
+den_qsmk0 <- density(data$smkIntensity[data$qsmk==0])
+den_qsmk1 <- density(data$smkIntensity[data$qsmk==1])
+plot( den_qsmk0, col="red", xlim=c(min(data$age), max(data$age)), main="smk_Intensity")
+lines( den_qsmk1, xlim=c(min(data$age), max(data$age)) )
+#The density of smkIntensity for qsmk=0 and qsmk=1 are similar, but have some noticeable difference.
+```
+
+```{r}
+# (a) ii) catergorical covariates
+tab<- table(data$sex, data$qsmk)
+prop.table(tab)
+# The proportion of people with sex=0 and qsmk=0 is higher than people with sex=0 and qsmk=1 
+# The proportion of people with sex=1 and qsmk=0 is higher than people with sex=1 and qsmk=1 
+```
+
+```{r}
+tab<- table(data$race, data$qsmk)
+prop.table(tab)
+#The majority(0.63) is the people whose race=0 and qsmk=0.
+# The proportion of people with race=0 and qsmk=0 is higher than people with race=0 and qsmk=1 
+# The proportion of people with race=0 and qsmk=0 is higher than people with race=0 and qsmk=1 
+```
+
+```{r}
+# (b)
+#fit a logistic model
+full_model<- glm(qsmk ~ as.factor(sex) + as.factor(race) + age + as.factor(educn)+ smkIntensity + smkYrs + as.factor(exer) + as.factor(active) + wt80, family = binomial(), data = data)
+#screen the effective covariates to explain the treatment factor qsmk. For this,
+summary(full_model)
+# the p-values of age, sex, race, educn,  smkIntensity, smkYrs, and exer are less than 0.10.
+```
+
+```{r}
+#Determine the propensity scores.
+prop_scores <- predict(full_model, type = "response")
+dt <- data.frame(1:25,data$qsmk[1:25], prop_scores[1:25])
+colnames(dt) <- c("unit","Quit Smoking or not", "Propensity Score")
+knitr::kable(dt)
+#print out the propensity scores for the first 25 units
+```
+
+```{r}
+tapply(prop_scores, data$qsmk, summary)
+#The mean, median, quantiles for qsmk=1 are higher than that for qsmk=0
+d0 <- density(prop_scores[data$qsmk==0])
+d1 <- density(prop_scores[data$qsmk==1])
+plot(d0, col="red", xlim=c(0,1), main="density curves for Propensity scores")
+lines(d1, xlim=c(0,1) )
+#The distribution of the propensity scores distribution vary with qsmk level
+```
+
+```{r}
+#(c)
+#from (b), the p-values of age, sex, race, educn,  smkIntensity, smkYrs, and exer are less than 0.10.
+reduced_model<- glm(qsmk ~ age + as.factor(sex)+ as.factor(race) + as.factor(educn) + smkIntensity + smkYrs + as.factor(exer), family = binomial() , data = data)
+summary(reduced_model)
+```
+
+```{r}
+prop_scores <- predict(reduced_model, type = "response")
+dt <- data.frame(1:25,data$qsmk[1:25], prop_scores[1:25])
+colnames(dt) <- c("unit","Quit Smoking or not", "Propensity Score")
+knitr::kable(dt)
+```
+
+```{r}
+tapply(prop_scores, data$qsmk, summary)
+#The mean, median, quantiles for qsmk=1 are higher than that for qsmk=0
+d0 <- density(prop_scores[data$qsmk==0])
+d1 <- density(prop_scores[data$qsmk==1])
+plot(d0, col="red", xlim=c(0,1), main="density curves for Propensity scores")
+lines(d1, xlim=c(0,1) )
+#The distribution of the propensity scores distribution vary with qsmk level
+```
+
+```{r}
+#(d)
+X <- reduced_model$fitted
+Y <- data$wt86_80
+Treatment <- data$qsmk
+#show 10 units
+head(cbind( Treatment,reduced_model$fitted), 10)
+#Match of units for propensity scores between groups for qsmk=0 and qsmk=1
+rr <- Match(Y = Y,Tr = Treatment,X = X,M = 1)
+attributes(rr)
+```
+
+```{r}
+summary(rr)
+#From summary, the matched number of observations is 413 
+```
+
+```{r}
+#Then check covariate balance.
+MatchBalance(data$qsmk ~ data$age + as.factor(data$sex)+ as.factor(data$race) + as.factor(data$educn) + data$smkIntensity + data$smkYrs + as.factor(data$exer), match.out = rr,nboots = 10)
+```
+
+```{r}
+#Density curve of age Before matching
+den_age_0_before<- density(data$age[data$qsmk==0])
+den_age_1_before<- density(data$age[data$qsmk==1])
+plot( den_age_0_before, col="red", main="density curve of Age Before matching")
+lines( den_age_1_before)
+#qq plot of age before matching
+qqplot(data$age[data$qsmk==0], data$age[data$qsmk==1], main="qq plot of Age Before matching")
+abline(coef=c(0,1), col=2)
+```
+
+```{r}
+#Density curve of age after matching
+den_age_0_after<- density(data$age[rr$index.control])
+den_age_1_after<- density(data$age[rr$index.treated])
+plot( den_age_0_after, col="red", main="density curve of Age after matching")
+lines( den_age_1_after) 
+#qq plot of age after matching
+qqplot(data$age[rr$index.control], data$age[rr$index.treated], main="qq plot of Age After matching")
+abline(coef=c(0,1), col=2)
+
+#As we can see, the density curves for qsmk=0 and qsmk=1 are more similar after matching. 
+#In the qq plot, after matching, all the points are almost on the line, which is a sign of improvment. 
+```
+
+```{r}
+# plot density curves for propensity scores before mathcing 
+den_qsmk0 <- density(prop_scores[data$qsmk==0])
+den_qsmk1 <- density(prop_scores[data$qsmk==1])
+plot( den_qsmk0, col="red", xlim=c(0,1), main="density curve of Propensity scores before match")
+lines( den_qsmk1, xlim=c(0,1) )
+
+# qq plots before matching
+qqplot(prop_scores[data$qsmk==0], prop_scores[data$qsmk==1], main="qq plot of propensity scores Before match")
+abline(coef=c(0,1), col=2)
+```
+
+```{r}
+# plot density curves for propensity scores after matching 
+d0<- density(reduced_model$fitted[rr$index.control])
+d1<- density(reduced_model$fitted[rr$index.treated])
+plot( d0, col="red" , main="density curve of Propensity scores after match")
+lines(d1)
+
+# qq plots for propensity scores after mathcing
+qqplot(reduced_model$fitted[rr$index.control], reduced_model$fitted[rr$index.treated], main="qq plot of propensity scores after match")
+abline(coef=c(0,1), col=2)
+
+#As we can see, the density curves for qsmk=0 and qsmk=1 are more similar after matching . 
+#In the qq plot, after matching, all the points are almost on the line, which is a sign of improvment. 
+```
+
+```{r}
+#(e)
+#e1 Before adjustment
+den_qsmk0<- density(data$wt86_80[data$qsmk==0])
+den_qsmk1<- density(data$wt86_80[data$qsmk==1])
+plot( den_qsmk0, col="red", main="wt86_80 before adjustment") 
+lines(den_qsmk1) 
+#The two densities for qsmk=0 and qsmk=1 show difference at their peaks around wt86_80 = 0
+```
+
+```{r}
+#e2 after adjustment
+den_control<- density(data$wt86_80[rr$index.control])
+den_treated<- density(data$wt86_80[rr$index.treated])
+plot( den_control, col="red", main="wt86_75 on matched units/after adjustment") 
+lines( den_treated)
+#As we can see, the density curves of wt86_80 for qsmk=0 and qsmk=1 are more similar after matching . 
+```
+
+```{r}
+#e3
+#Before matching 
+qqplot(data$wt86_80[data$qsmk==0],data$wt86_80[data$qsmk==1], main="wt86_80 before matching")
+abline(coef=c(0,1), col=2)
+#The top right tail deviates from the red line.
+```
+
+```{r}
+#e4
+#After matching
+qqplot(data$wt86_80[rr$index.control],data$wt86_80[rr$index.treated], main="wt86_80 after matching")
+abline(coef=c(0,1), col=2)
+#Still lots of points are not on the line. But more points are closer to the red line after matching, which is a sign of improvement. 
+```
+
+```{r}
+#e5
+#Before matching 
+t.test(data$wt86_80[as.factor(data$qsmk)==0], data$wt86_80[as.factor(data$qsmk)==1],var.equal = T)
+#From the output, p-value is less than 0.05, which means we should reject H0, and conclude true difference in means is not equal to 0
+```
+
+```{r}
+#e6
+#After matching
+t.test(data$wt86_80[rr$index.control], data$wt86_80[rr$index.treated],var.equal = T)
+#From the output, p-value is much less than 0.05, which means we should reject H0, and conclude true difference in means is not equal to 0
+#This also indicates the matching process makes improvement
+```
+
+
+
+
+
+
+
+
+
+
