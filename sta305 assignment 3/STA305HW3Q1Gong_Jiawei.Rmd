@@ -1,0 +1,70 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-03-22"
+---
+
+```{r}
+#Q1
+data1<-read.csv("DataHW3Q1W2024RatioControl.csv")
+data1
+Algorithm<-as.factor(data1$Algorithm)
+TimePeriod<-as.factor(data1$TimePeriod)
+
+```
+
+```{r}
+#(a)
+av_CVolt<-aov(data1$avCVolt ~ Algorithm + TimePeriod)
+summary(av_CVolt)
+```
+
+```{r}
+#Check normality
+qqnorm(av_CVolt$residuals)
+qqline(av_CVolt$residuals)
+qqPlot(av_CVolt$residuals)
+#Although, there are lots of points not on the line, these deviated points are in the range of confidence band. Hence, the normality is held. 
+#The normality assumption is satisfied.
+```
+
+```{r}
+#residual plot
+plot(av_CVolt$fitted.values, av_CVolt$residuals, xlab='fitted', ylab='residual')
+abline(h=0)
+#From the residual plots, the scatter has no fanning pattern
+#Hence, the assumption of heterogeneity in the error variance is met.
+```
+
+```{r}
+#(b)
+sd_CVolt<-aov(log(data1$sdCVolt) ~ Algorithm + TimePeriod)
+summary(sd_CVolt)
+```
+
+```{r}
+qqnorm(sd_CVolt$residuals)
+qqline(sd_CVolt$residuals)
+qqPlot(sd_CVolt$residuals)
+#Although, there are lots of points not on the line, these deviated points are in the range of confidence band. Hence, the normality is held. 
+#The normality assumption is satisfied.
+```
+
+
+```{r}
+#residual plot
+plot(sd_CVolt$fitted.values, sd_CVolt$residuals,xlab='fitted', ylab='residual')
+abline(h=0)
+#From the residual plots, the scatter has no fanning pattern
+#Hence, the assumption of heterogeneity in the error variance is met.
+```
+```{r}
+#(c)
+sdCVoltv<-data1$sdCVolt
+sum(sdCVoltv[Algorithm==1])
+sum(sdCVoltv[Algorithm==2])
+sum(sdCVoltv[Algorithm==3])
+sum(sdCVoltv[Algorithm==4])
+```
+
+

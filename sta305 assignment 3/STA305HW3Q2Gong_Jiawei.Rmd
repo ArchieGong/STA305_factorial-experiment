@@ -1,0 +1,38 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-03-22"
+---
+
+```{r}
+#Q2
+data2<-read.csv("DataHW3Q2W2024MV.csv")
+data2
+```
+
+```{r}
+#(b)
+#The missing value in this dataset is Row=3, Col=3, Treatment=C
+p<-4
+Yield <- data2$Yield
+Row<- as.factor(data2$Row)
+Col<- as.factor(data2$Col)
+Treat<- as.factor(data2$Treat)
+
+y3..<- sum(Yield[!is.na(Yield) & Row==3])
+y.3.<- sum(Yield[!is.na(Yield) & Col==3])
+y..C<- sum(Yield[!is.na(Yield) & Treat== "C"])
+y...<- sum(Yield[!is.na(Yield)])
+y_33C <- (p*(y3.. +y.3. + y..C)-2*y...)/((p-1)*(p-2))
+y_33C
+```
+The missing value y_33C is 131.67
+
+```{r}
+#Model fitting
+model_Q2<- aov(Yield ~ Row + Col + Treat)
+summary(model_Q2)
+predict(model_Q2, newdata=data.frame(Row,Col,Treat))[is.na(Yield)]
+```
+By building model, we also find out that the missing value y_33C is 131.67
+

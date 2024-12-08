@@ -1,0 +1,76 @@
+---
+title: "Untitled"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-03-22"
+---
+
+```{r, results='hide'}
+#Q4(a) these code are just help, not answers.
+data4<-read.csv("DataHW3Q4W2024F2pwr5.csv")
+data4
+data4$A<- ifelse(data4$A==1,0,1)
+data4$B<- ifelse(data4$B==-1,0,1)
+data4$C<- ifelse(data4$C==1,0,1)
+data4$D<- ifelse(data4$D==1,0,1)
+data4$E<- ifelse(data4$E==1,0,1)
+data4
+Yield<- data4$Yield
+Blk<- (data4$A +data4$B+data4$C+data4$D+data4$E) %% 2 +1
+
+cbind(Blk,data4$A,data4$B,data4$C,data4$D,data4$E,Yield)
+
+data4<-read.csv("DataHW3Q4W2024F2pwr5.csv")
+A<-data4$A
+B<-data4$B
+C<-data4$C
+D<-data4$D
+E<-data4$E
+
+
+```
+
+```{r}
+#b(i)
+model4 <- lm(Yield~ Blk+A*B*C*D*E)
+round(2*model4$coefficients,4)
+#The factorial effects
+summary(aov(model4))
+#The anova table for the yield are shown below with effects and interactions in the model
+```
+
+```{r}
+#b(ii)
+anova(model4)
+#The sum of squares are shown below
+```
+
+```{r}
+anov<- anova(model4)
+anov
+SS_percent <- data.frame(row.names=row.names(anov), effect=row.names(anov), contribution_percent=anov[, 2] *100/sum( anov[,2]) )
+SS_percent
+#We can see the biggest conribution are A, B, C, A:B, so they are active effects and interactions.
+```
+
+```{r}
+library(FrF2)
+DanielPlot(model4, half= TRUE,autolab = T)
+#From the Half Normal plot of effects, we can also observe that A, B, C, A:B are active effects and interactions.
+```
+
+
+```{r}
+#b(iii) From b(ii), we know A, B, C, A:B are active effects and interactions. 
+model4_active <- lm(Yield~ Blk + C + A*B)
+round(2*model4_active$coefficients,2)
+#The factorial effect are shown below
+```
+
+```{r}
+summary(aov(model4_active))
+#As we can see from the output, all p-values are less than 0.05. Hence, all the effect and interaction in this new model are significant. 
+```
+
+

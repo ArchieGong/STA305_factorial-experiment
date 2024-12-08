@@ -1,0 +1,91 @@
+---
+title: "Untitled"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-03-22"
+---
+
+```{r}
+#Q3
+library(car)
+data3<-read.csv("DataHW3Q3W2024WtGain.csv")
+data3
+WtGain<-data3$WtGain
+Diet<-as.factor(data3$Diet)
+Litter<-as.factor(data3$Litter)
+```
+
+```{r}
+#(a) a=6 b=10 r=5 k=3, lambda=r(k-1)/(a-1) = 2
+a<- 6
+b<-10
+r<-5
+k<-3
+lambda<-2
+Nmat<- matrix(0,nrow=a, ncol=b)
+for(i in 1:a){
+  for(j in 1:b){
+    Nmat[i,j] = length(WtGain[Diet==i & Litter==j])}}
+Nmat%*%t(Nmat)
+#As the matrix NN’ is in the form (r-lambda)*I + lambda*J, the experiment was conducted in a BIBD
+```
+
+```{r}
+#b(i)
+model3<-lm(WtGain~Litter+Diet)
+anova(model3)
+#As shown in the anova table, p-value of Diet is less than 0.05. Hence, diets have statistical significance in affecting the weight gain
+```
+
+```{r}
+#b(ii)
+# Then means
+N<- length(WtGain)
+
+total_trt<- c(0, dim=c(a))
+adj_total_trt<- c(0, dim=c(a))
+Block<- c(0, dim=c(b))
+
+for(j in 1:b){
+  Block[j]<- sum(WtGain[Litter==j])}
+
+for(i in 1:a){ 
+  total_trt[i]<- sum(WtGain[Diet==i])
+  adj_total_trt[i]<- total_trt[i]- (1/k)* sum(Nmat[i,]*Block)
+}
+
+adj_mean <- (k/lambda/a)*adj_total_trt + mean(WtGain)
+mean <- (1/r)*total_trt
+
+cbind(diets=c(1:6), adj_Mean=round(adj_mean,2), unadj_Mean=round(mean,2))
+#The adjusted mean and unadjusted mean for 6 diets are shown in the following table.
+```
+
+```{r}
+#b(iii)
+#Check normality
+qqnorm(model3$residuals)
+qqline(model3$residuals)
+#There are little deviation from the line. The normality assumption is satisfied.
+```
+
+```{r}
+qqPlot(model3$residuals)
+#Although, there are lots of points not on the line, these deviated points are in the range of confidence band. Hence, the normality is held. 
+```
+
+```{r}
+#check for heterogeneity in the error variance
+plot(model3$fitted.values, model3$residuals, main="Residuals vs. Fitted")
+abline(h=0)
+#From the residual plots, the scatter has no fanning pattern
+#Hence, the assumption of heterogeneity in the error variance is met.
+```
+
+```{r}
+plot(model3$model$Diet,model3$residuals, main="Residuals vs. Levels")
+#There is no fanning pattern
+```
+
+
